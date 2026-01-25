@@ -4,10 +4,11 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import com.wintermindset.transaction_service.entity.Role;
 import com.wintermindset.transaction_service.entity.UserEntity;
+import com.wintermindset.transaction_service.enums.user.Role;
 
 public class DefaultUserFactory implements UserFactory {
+
     private static final String USERNAME_PATTERN = 
         "^[a-zA-Z][a-zA-Z0-9_]{1,18}[a-zA-Z0-9]$";
     private static final Pattern USERNAME_PATTERN_COMPILED = Pattern.compile(USERNAME_PATTERN);
@@ -23,7 +24,8 @@ public class DefaultUserFactory implements UserFactory {
             String username,
             String passwordHash,
             Role role,
-            Instant creationTime) {
+            Instant creationTime
+    ) {
         validateUsername(username);
         validatePasswordHash(passwordHash);
         validateRole(role);

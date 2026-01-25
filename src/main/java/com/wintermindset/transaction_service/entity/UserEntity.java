@@ -3,6 +3,9 @@ package com.wintermindset.transaction_service.entity;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.wintermindset.transaction_service.enums.user.DeactivationReason;
+import com.wintermindset.transaction_service.enums.user.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -67,7 +70,8 @@ public class UserEntity {
             String username,
             String passwordHash,
             Role role,
-            Instant createdAt) {
+            Instant createdAt
+    ) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.role = role;
@@ -138,7 +142,8 @@ public class UserEntity {
     public void deactivate(
             Instant occurredAt,
             DeactivationReason reason,
-            Role deactivatedBy) {
+            Role deactivatedBy
+    ) {
         if (!active) {
             throw new IllegalStateException("User already deactivated");
         }
