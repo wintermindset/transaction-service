@@ -1,5 +1,6 @@
 package com.wintermindset.transaction_service.factory;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -18,15 +19,20 @@ public class DefaultUserFactory implements UserFactory {
         4. Allowed characters: letters, digits, underscore""";
 
     @Override
-    public UserEntity createUser(String username, String passwordHash, Role role) {
+    public UserEntity createUser(
+            String username,
+            String passwordHash,
+            Role role,
+            Instant creationTime) {
         validateUsername(username);
         validatePasswordHash(passwordHash);
         validateRole(role);
-        return new UserEntity(username, passwordHash, role);
+        validateCreationTime(creationTime);
+        return new UserEntity(username, passwordHash, role, creationTime);
     }
 
     private void validateUsername(String username) {
-        Objects.requireNonNull(username, "Username  must not be null");
+        Objects.requireNonNull(username, "Username must not be null");
         if (username.isBlank()) {
             throw new IllegalArgumentException("Username must not be blank");
         }
@@ -52,5 +58,9 @@ public class DefaultUserFactory implements UserFactory {
 
     private void validateRole(Role role) {
         Objects.requireNonNull(role, "Role must not be null");
+    }
+
+    private void validateCreationTime(Instant creationTime) {
+        Objects.requireNonNull(creationTime, "Creation time must not be null");
     }
 }
