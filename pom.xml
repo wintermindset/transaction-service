@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.wintermindset</groupId>
 	<artifactId>transaction-service</artifactId>
-	<version>0.0.0</version>
+	<version>0.1.0</version>
 	<name>transaction-service</name>
 	<description>Spring Boot REST API microservice for processing financial transactions with JWT authentication, account management, and money transfers using Java and PostgreSQL.</description>
 	<url>https://github.com/wintermindset/transaction-service</url>
@@ -71,6 +71,11 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
 	</dependencies>
