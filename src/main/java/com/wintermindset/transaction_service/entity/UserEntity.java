@@ -140,6 +140,10 @@ public class UserEntity {
         return active;
     }
 
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
     public void deactivate(
             Instant occurredAt,
             DeactivationReason reason,
