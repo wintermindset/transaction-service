@@ -38,7 +38,7 @@ public class UserEntity {
     @Column(nullable = false, length = 50)
     private Role role;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     public UserEntity() {
