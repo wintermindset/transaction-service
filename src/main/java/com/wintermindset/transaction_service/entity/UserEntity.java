@@ -80,42 +80,6 @@ public class UserEntity {
         this.active = true;
     }
 
-    /**
-     * Safeguard only.
-     */
-    @PrePersist
-    void onCreate() {
-        validateState();
-    }
-
-    /**
-     * Safeguard only.
-     */
-    @PreUpdate
-    void onUpdate() {
-        validateState();
-    }
-
-    private void validateState() {
-        if (active) {
-            if (deactivatedAt != null
-                || deactivationReason != null
-                || deactivatedBy != null) {
-                throw new IllegalStateException(
-                    "Active user must not have deactivation audit data"
-                );
-            }
-        } else {
-            if (deactivatedAt == null
-                || deactivationReason == null
-                || deactivatedBy == null) {
-                throw new IllegalStateException(
-                    "Inactive user must have full deactivation audit data"
-                );
-            }
-        }
-    }
-
     public UUID getId() {
         return id;
     }
@@ -185,5 +149,30 @@ public class UserEntity {
         deactivatedAt = null;
         deactivationReason = null;
         deactivatedBy = null;
+    }
+
+    /**
+     * Safeguard only.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateState() {
+        if (active) {
+            if (deactivatedAt != null
+                || deactivationReason != null
+                || deactivatedBy != null) {
+                throw new IllegalStateException(
+                    "Active user must not have deactivation audit data"
+                );
+            }
+        } else {
+            if (deactivatedAt == null
+                || deactivationReason == null
+                || deactivatedBy == null) {
+                throw new IllegalStateException(
+                    "Inactive user must have full deactivation audit data"
+                );
+            }
+        }
     }
 }
