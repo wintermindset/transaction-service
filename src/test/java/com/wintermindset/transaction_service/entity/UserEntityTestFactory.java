@@ -11,17 +11,46 @@ public final class UserEntityTestFactory {
     }
 
     public static UserEntity createActiveUser() {
-        return new UserEntity(
-                "testuser",
-                "hashed-password",
-                Role.USER,
-                Instant.now()
-        );
+        return createActiveUser("testuser", Role.USER, "hashed-password", Instant.now());
+    }
+
+    public static UserEntity createActiveUser(String username) {
+        return createActiveUser(username, Role.USER, "hashed-password", Instant.now());
+    }
+
+    public static UserEntity createActiveUser(String username, Role role) {
+        return createActiveUser(username, role, "hashed-password", Instant.now());
+    }
+
+    public static UserEntity createActiveUser(String username, Role role, String passwordHash) {
+        return createActiveUser(username, role, passwordHash, Instant.now());
+    }
+
+    public static UserEntity createActiveUser(String username, Role role, String passwordHash, Instant createdAt) {
+        return new UserEntity(username, passwordHash, role, createdAt);
     }
 
     public static UserEntity createDeactivatedUser() {
         UserEntity user = createActiveUser();
         user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        return user;
+    }
+
+    public static UserEntity createDeactivatedUser(String username) {
+        UserEntity user = createActiveUser(username);
+        user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        return user;
+    }
+
+    public static UserEntity createDeactivatedUser(String username, Role role) {
+        UserEntity user = createActiveUser(username, role);
+        user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        return user;
+    }
+
+    public static UserEntity createDeactivatedUser(String username, Role role, Instant deactivatedAt) {
+        UserEntity user = createActiveUser(username, role);
+        user.deactivate(deactivatedAt, DeactivationReason.ADMIN_ACTION, Role.ADMIN);
         return user;
     }
 }
