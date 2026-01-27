@@ -140,6 +140,22 @@ public class UserEntity {
         return active;
     }
 
+    public Instant getDeactivatedAt() {
+        return deactivatedAt;
+    }
+
+    public DeactivationReason getDeactivationReason() {
+        return deactivationReason;
+    }
+
+    public Role getDeactivatedBy() {
+        return deactivatedBy;
+    }
+
+    public Instant getLastLoginAt() {
+        return lastLoginAt;
+    }
+
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
