@@ -127,4 +127,8 @@ public class UserService {
         user.setPasswordHash(newPasswordHash);
         userRepository.save(user);
     }
+
+    public Optional<UserEntity> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }
