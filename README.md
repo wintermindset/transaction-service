@@ -77,7 +77,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 ## JWT Authentication
 
-- Users authenticate via `/api/auth/login`.
+- Users authenticate via `/api/auth/authenticate`.
 - JWT token returned must be included in `Authorization: Bearer <token>` header for protected endpoints.
 - Roles are supported (e.g., USER, ADMIN).
 

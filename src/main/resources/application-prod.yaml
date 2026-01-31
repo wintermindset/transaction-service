@@ -1,6 +1,13 @@
 spring:
   application:
     name: transaction-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bank_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 server:
   servlet:
