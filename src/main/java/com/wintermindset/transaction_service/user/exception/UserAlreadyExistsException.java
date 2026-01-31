@@ -1,4 +1,4 @@
-package com.wintermindset.transaction_service.exception.user;
+package com.wintermindset.transaction_service.user.exception;
 
 public class UserAlreadyExistsException extends RuntimeException {
     
