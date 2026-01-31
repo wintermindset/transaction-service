@@ -1,10 +1,10 @@
-package com.wintermindset.transaction_service.entity;
+package com.wintermindset.transaction_service.user.entity;
 
 import java.time.Instant;
 import java.util.UUID;
 
-import com.wintermindset.transaction_service.enums.user.DeactivationReason;
-import com.wintermindset.transaction_service.enums.user.Role;
+import com.wintermindset.transaction_service.user.enums.DeactivationReason;
+import com.wintermindset.transaction_service.user.enums.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-package com.wintermindset.transaction_service.enums.user;
+package com.wintermindset.transaction_service.user.enums;
 
 public enum DeactivationReason {
     USER_REQUEST,

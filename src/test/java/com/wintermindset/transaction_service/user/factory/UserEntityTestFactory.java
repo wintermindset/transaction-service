@@ -1,9 +1,10 @@
-package com.wintermindset.transaction_service.entity;
+package com.wintermindset.transaction_service.user.factory;
 
 import java.time.Instant;
 
-import com.wintermindset.transaction_service.enums.user.DeactivationReason;
-import com.wintermindset.transaction_service.enums.user.Role;
+import com.wintermindset.transaction_service.user.entity.UserEntity;
+import com.wintermindset.transaction_service.user.enums.DeactivationReason;
+import com.wintermindset.transaction_service.user.enums.Role;
 
 public final class UserEntityTestFactory {
 
