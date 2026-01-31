@@ -35,3 +35,5 @@ build/
 application-prod.yml
 application-*.local.yml
 .env
+
+.DS_Store
