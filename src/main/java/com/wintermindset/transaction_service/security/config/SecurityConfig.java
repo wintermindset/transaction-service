@@ -1,4 +1,4 @@
-package com.wintermindset.transaction_service.config;
+package com.wintermindset.transaction_service.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

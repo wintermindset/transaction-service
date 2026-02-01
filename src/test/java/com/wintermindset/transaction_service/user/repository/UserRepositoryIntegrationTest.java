@@ -1,9 +1,9 @@
-package com.wintermindset.transaction_service.repository;
+package com.wintermindset.transaction_service.user.repository;
 
-import com.wintermindset.transaction_service.entity.UserEntity;
-import com.wintermindset.transaction_service.entity.UserEntityTestFactory;
-import com.wintermindset.transaction_service.enums.user.DeactivationReason;
-import com.wintermindset.transaction_service.enums.user.Role;
+import com.wintermindset.transaction_service.user.entity.UserEntity;
+import com.wintermindset.transaction_service.user.enums.DeactivationReason;
+import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.factory.UserEntityTestFactory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

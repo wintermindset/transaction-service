@@ -1,11 +1,12 @@
-package com.wintermindset.transaction_service.entity;
+package com.wintermindset.transaction_service.user.entity;
 
 import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 
-import com.wintermindset.transaction_service.enums.user.DeactivationReason;
-import com.wintermindset.transaction_service.enums.user.Role;
+import com.wintermindset.transaction_service.user.enums.DeactivationReason;
+import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.factory.UserEntityTestFactory;
 
 import static org.assertj.core.api.Assertions.*;
 

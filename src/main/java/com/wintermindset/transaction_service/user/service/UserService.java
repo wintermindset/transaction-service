@@ -1,4 +1,4 @@
-package com.wintermindset.transaction_service.service;
+package com.wintermindset.transaction_service.user.service;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -9,12 +9,12 @@ import java.util.regex.Pattern;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.wintermindset.transaction_service.entity.UserEntity;
-import com.wintermindset.transaction_service.enums.user.Role;
-import com.wintermindset.transaction_service.exception.user.BadPasswordException;
-import com.wintermindset.transaction_service.exception.user.UserNotFoundException;
-import com.wintermindset.transaction_service.exception.user.UserAlreadyExistsException;
-import com.wintermindset.transaction_service.repository.UserRepository;
+import com.wintermindset.transaction_service.user.entity.UserEntity;
+import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.exception.BadPasswordException;
+import com.wintermindset.transaction_service.user.exception.UserAlreadyExistsException;
+import com.wintermindset.transaction_service.user.exception.UserNotFoundException;
+import com.wintermindset.transaction_service.user.repository.UserRepository;
 
 @Service
 public class UserService {

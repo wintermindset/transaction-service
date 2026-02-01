@@ -1,24 +1,24 @@
-package com.wintermindset.transaction_service.exception.user;
+package com.wintermindset.transaction_service.user.exception;
 
-public class BadUsernameException extends RuntimeException {
+public class BadPasswordException extends RuntimeException {
     
-    public BadUsernameException() {
+    public BadPasswordException() {
         super();
     }
 
-    public BadUsernameException(String message) {
+    public BadPasswordException(String message) {
         super(message);
     }
 
-    public BadUsernameException(Throwable cause) {
+    public BadPasswordException(Throwable cause) {
         super(cause);
     }
 
-    public BadUsernameException(String message, Throwable cause) {
+    public BadPasswordException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public BadUsernameException(
+    public BadPasswordException(
                 String message,
                 Throwable cause,
                 boolean enableSuppression,
