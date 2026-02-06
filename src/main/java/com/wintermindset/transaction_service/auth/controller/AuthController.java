@@ -4,7 +4,7 @@ import com.wintermindset.transaction_service.auth.dto.request.AuthRequest;
 import com.wintermindset.transaction_service.auth.dto.request.RegisterRequest;
 import com.wintermindset.transaction_service.auth.dto.response.AuthResponse;
 import com.wintermindset.transaction_service.user.entity.UserEntity;
-import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.enums.UserRole;
 import com.wintermindset.transaction_service.user.exception.UserNotFoundException;
 import com.wintermindset.transaction_service.user.service.UserService;
 import com.wintermindset.transaction_service.security.jwt.JwtTokenProvider;
@@ -48,7 +48,7 @@ public class AuthController {
             UserDetails userDetails = User.builder()
                     .username(user.getUsername())
                     .password(user.getPasswordHash())
-                    .roles(user.getRole().toString())
+                    .roles(user.getUserRole().toString())
                     .build();
             String token = jwtTokenProvider.generateToken(userDetails);
             return ResponseEntity.ok(new AuthResponse(token));
@@ -62,7 +62,7 @@ public class AuthController {
         if (userService.findByUsername(request.username()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
-        userService.createUser(request.username(), request.password(), Role.USER, Instant.now());
+        userService.createUser(request.username(), request.password(), UserRole.USER, Instant.now());
         return ResponseEntity.ok("User registered successfully");
     }
 }

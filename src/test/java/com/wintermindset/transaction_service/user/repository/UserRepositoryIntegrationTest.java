@@ -2,7 +2,7 @@ package com.wintermindset.transaction_service.user.repository;
 
 import com.wintermindset.transaction_service.user.entity.UserEntity;
 import com.wintermindset.transaction_service.user.enums.DeactivationReason;
-import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.enums.UserRole;
 import com.wintermindset.transaction_service.user.factory.UserEntityTestFactory;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -151,7 +151,7 @@ class UserRepositoryIntegrationTest {
         UserEntity user = UserEntityTestFactory.createActiveUser(username);
         UserEntity savedUser = userRepository.save(user);
 
-        savedUser.deactivate(Instant.now(), DeactivationReason.USER_REQUEST, Role.ADMIN);
+        savedUser.deactivate(Instant.now(), DeactivationReason.USER_REQUEST, UserRole.ADMIN);
         userRepository.save(savedUser);
 
         Optional<UserEntity> deactivatedUser = userRepository.findById(savedUser.getId());
@@ -171,11 +171,11 @@ class UserRepositoryIntegrationTest {
     @Test
     void userWithDifferentRoles_works() {
         String username = uniqueUsername("admin.user");
-        UserEntity user = UserEntityTestFactory.createActiveUser(username, Role.ADMIN);
+        UserEntity user = UserEntityTestFactory.createActiveUser(username, UserRole.ADMIN);
         UserEntity savedUser = userRepository.save(user);
 
         Optional<UserEntity> foundUser = userRepository.findById(savedUser.getId());
         assertThat(foundUser).isPresent();
-        assertThat(foundUser.get().getRole()).isEqualTo(Role.ADMIN);
+        assertThat(foundUser.get().getUserRole()).isEqualTo(UserRole.ADMIN);
     }
 }

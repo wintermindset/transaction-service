@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import com.wintermindset.transaction_service.user.entity.UserEntity;
 import com.wintermindset.transaction_service.user.enums.DeactivationReason;
-import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.enums.UserRole;
 
 public final class UserEntityTestFactory {
 
@@ -12,46 +12,46 @@ public final class UserEntityTestFactory {
     }
 
     public static UserEntity createActiveUser() {
-        return createActiveUser("testuser", Role.USER, "hashed-password", Instant.now());
+        return createActiveUser("testuser", UserRole.USER, "hashed-password", Instant.now());
     }
 
     public static UserEntity createActiveUser(String username) {
-        return createActiveUser(username, Role.USER, "hashed-password", Instant.now());
+        return createActiveUser(username, UserRole.USER, "hashed-password", Instant.now());
     }
 
-    public static UserEntity createActiveUser(String username, Role role) {
+    public static UserEntity createActiveUser(String username, UserRole role) {
         return createActiveUser(username, role, "hashed-password", Instant.now());
     }
 
-    public static UserEntity createActiveUser(String username, Role role, String passwordHash) {
+    public static UserEntity createActiveUser(String username, UserRole role, String passwordHash) {
         return createActiveUser(username, role, passwordHash, Instant.now());
     }
 
-    public static UserEntity createActiveUser(String username, Role role, String passwordHash, Instant createdAt) {
+    public static UserEntity createActiveUser(String username, UserRole role, String passwordHash, Instant createdAt) {
         return new UserEntity(username, passwordHash, role, createdAt);
     }
 
     public static UserEntity createDeactivatedUser() {
         UserEntity user = createActiveUser();
-        user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, UserRole.ADMIN);
         return user;
     }
 
     public static UserEntity createDeactivatedUser(String username) {
         UserEntity user = createActiveUser(username);
-        user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, UserRole.ADMIN);
         return user;
     }
 
-    public static UserEntity createDeactivatedUser(String username, Role role) {
+    public static UserEntity createDeactivatedUser(String username, UserRole role) {
         UserEntity user = createActiveUser(username, role);
-        user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        user.deactivate(Instant.now(), DeactivationReason.ADMIN_ACTION, UserRole.ADMIN);
         return user;
     }
 
-    public static UserEntity createDeactivatedUser(String username, Role role, Instant deactivatedAt) {
+    public static UserEntity createDeactivatedUser(String username, UserRole role, Instant deactivatedAt) {
         UserEntity user = createActiveUser(username, role);
-        user.deactivate(deactivatedAt, DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        user.deactivate(deactivatedAt, DeactivationReason.ADMIN_ACTION, UserRole.ADMIN);
         return user;
     }
 }

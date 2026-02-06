@@ -3,9 +3,6 @@ package com.wintermindset.transaction_service.user.entity;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.wintermindset.transaction_service.user.enums.DeactivationReason;
-import com.wintermindset.transaction_service.user.enums.Role;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +14,9 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import com.wintermindset.transaction_service.user.enums.DeactivationReason;
+import com.wintermindset.transaction_service.user.enums.UserRole;
 
 @Entity
 @Table(
@@ -30,24 +30,24 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "username", nullable = false, length = 100)
     private String username;
 
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
-    private Role role;
+    @Column(name = "user_role", nullable = false, length = 50)
+    private UserRole userRole;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @Column(nullable = false)
-    private boolean active;
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
 
     @Column(name = "deactivated_at")
     private Instant deactivatedAt;
@@ -58,7 +58,7 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "deactivated_by", length = 100)
-    private Role deactivatedBy;
+    private UserRole deactivatedBy;
 
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
@@ -68,16 +68,16 @@ public class UserEntity {
     }
 
     public UserEntity(
-            String username,
-            String passwordHash,
-            Role role,
-            Instant createdAt
+        String username,
+        String passwordHash,
+        UserRole userRole,
+        Instant createdAt
     ) {
         this.username = username;
         this.passwordHash = passwordHash;
-        this.role = role;
+        this.userRole = userRole;
         this.createdAt = createdAt;
-        this.active = true;
+        this.isActive = true;
     }
 
     public UUID getId() {
@@ -92,8 +92,8 @@ public class UserEntity {
         return passwordHash;
     }
 
-    public Role getRole() {
-        return role;
+    public UserRole getUserRole() {
+        return userRole;
     }
 
     public Instant getCreatedAt() {
@@ -101,7 +101,7 @@ public class UserEntity {
     }
 
     public boolean isActive() {
-        return active;
+        return isActive;
     }
 
     public Instant getDeactivatedAt() {
@@ -112,7 +112,7 @@ public class UserEntity {
         return deactivationReason;
     }
 
-    public Role getDeactivatedBy() {
+    public UserRole getDeactivatedBy() {
         return deactivatedBy;
     }
 
@@ -125,27 +125,27 @@ public class UserEntity {
     }
 
     public void deactivate(
-            Instant occurredAt,
-            DeactivationReason reason,
-            Role deactivatedBy
+        Instant occurredAt,
+        DeactivationReason reason,
+        UserRole deactivatedBy
     ) {
-        if (!active) {
+        if (!isActive) {
             throw new IllegalStateException("User already deactivated");
         }
         if (occurredAt == null || reason == null || deactivatedBy == null) {
             throw new IllegalArgumentException("Deactivation audit data is required");
         }
-        active = false;
+        isActive = false;
         deactivatedAt = occurredAt;
         deactivationReason = reason;
         this.deactivatedBy = deactivatedBy;
     }
 
     public void activate() {
-        if (active) {
+        if (isActive) {
             return;
         }
-        active = true;
+        isActive = true;
         deactivatedAt = null;
         deactivationReason = null;
         deactivatedBy = null;
@@ -157,10 +157,11 @@ public class UserEntity {
     @PrePersist
     @PreUpdate
     public void validateState() {
-        if (active) {
+        if (isActive) {
             if (deactivatedAt != null
                 || deactivationReason != null
-                || deactivatedBy != null) {
+                || deactivatedBy != null
+            ) {
                 throw new IllegalStateException(
                     "Active user must not have deactivation audit data"
                 );

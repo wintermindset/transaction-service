@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.wintermindset.transaction_service.user.entity.UserEntity;
-import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.enums.UserRole;
 import com.wintermindset.transaction_service.user.exception.BadPasswordException;
 import com.wintermindset.transaction_service.user.exception.UserAlreadyExistsException;
 import com.wintermindset.transaction_service.user.exception.UserNotFoundException;
@@ -41,7 +41,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserEntity createUser(String username, String rawPassword, Role role, Instant creationTime) {
+    public UserEntity createUser(String username, String rawPassword, UserRole role, Instant creationTime) {
         String trimmedUsername = username.trim();
         validateUsername(trimmedUsername);
         if (userRepository.existsByUsername(trimmedUsername)) {
@@ -101,7 +101,7 @@ public class UserService {
         }
     }
 
-    private void validateRole(Role role) {
+    private void validateRole(UserRole role) {
         Objects.requireNonNull(role, "Role must not be null");
     }
 

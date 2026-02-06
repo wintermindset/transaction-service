@@ -5,7 +5,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 import com.wintermindset.transaction_service.user.enums.DeactivationReason;
-import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.enums.UserRole;
 import com.wintermindset.transaction_service.user.factory.UserEntityTestFactory;
 
 import static org.assertj.core.api.Assertions.*;
@@ -21,7 +21,7 @@ class UserEntityTest {
         assertThat(user.isActive()).isTrue();
         assertThat(user.getUsername()).isEqualTo("testuser");
         assertThat(user.getPasswordHash()).isEqualTo("hashed-password");
-        assertThat(user.getRole()).isEqualTo(Role.USER);
+        assertThat(user.getUserRole()).isEqualTo(UserRole.USER);
         assertThat(user.getCreatedAt()).isNotNull();
         assertThat(user.getDeactivatedAt()).isNull();
         assertThat(user.getDeactivationReason()).isNull();
@@ -35,12 +35,12 @@ class UserEntityTest {
         UserEntity user = UserEntityTestFactory.createActiveUser();
         Instant now = Instant.now();
 
-        user.deactivate(now, DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        user.deactivate(now, DeactivationReason.ADMIN_ACTION, UserRole.ADMIN);
 
         assertThat(user.isActive()).isFalse();
         assertThat(user.getDeactivatedAt()).isEqualTo(now);
         assertThat(user.getDeactivationReason()).isEqualTo(DeactivationReason.ADMIN_ACTION);
-        assertThat(user.getDeactivatedBy()).isEqualTo(Role.ADMIN);
+        assertThat(user.getDeactivatedBy()).isEqualTo(UserRole.ADMIN);
     }
 
     @Test
@@ -51,7 +51,7 @@ class UserEntityTest {
                 user.deactivate(
                         Instant.now(),
                         DeactivationReason.ADMIN_ACTION,
-                        Role.ADMIN
+                        UserRole.ADMIN
                 )
         ).isInstanceOf(IllegalStateException.class)
          .hasMessage("User already deactivated");
@@ -62,11 +62,11 @@ class UserEntityTest {
         UserEntity user = UserEntityTestFactory.createActiveUser();
 
         assertThatThrownBy(() ->
-                user.deactivate(null, DeactivationReason.ADMIN_ACTION, Role.ADMIN)
+                user.deactivate(null, DeactivationReason.ADMIN_ACTION, UserRole.ADMIN)
         ).isInstanceOf(IllegalArgumentException.class);
 
         assertThatThrownBy(() ->
-                user.deactivate(Instant.now(), null, Role.ADMIN)
+                user.deactivate(Instant.now(), null, UserRole.ADMIN)
         ).isInstanceOf(IllegalArgumentException.class);
 
         assertThatThrownBy(() ->
