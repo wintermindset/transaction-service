@@ -1,13 +1,13 @@
 package com.wintermindset.transaction_service.user.enums;
 
-public enum Role {
-    
+public enum UserRole {
+
     ADMIN(true),    
     USER(false);
 
     private final boolean canManageUsers;
 
-    private Role(boolean canManageUsers) {
+    private UserRole(boolean canManageUsers) {
         this.canManageUsers = canManageUsers;
     }
 
