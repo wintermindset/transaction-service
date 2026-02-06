@@ -6,12 +6,12 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.wintermindset.transaction_service.user.entity.UserEntity;
+import com.wintermindset.transaction_service.user.entity.UserProfileEntity;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserEntity, UUID> {
+public interface UserProfileRepository extends JpaRepository<UserProfileEntity, UUID> {
 
-    Optional<UserEntity> findByUsername(String username);
+    Optional<UserProfileEntity> findByUsername(String username);
 
     boolean existsByUsername(String username);
 }

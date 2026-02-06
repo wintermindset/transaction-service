@@ -5,7 +5,8 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 import com.wintermindset.transaction_service.user.enums.DeactivationReason;
-import com.wintermindset.transaction_service.user.enums.Role;
+import com.wintermindset.transaction_service.user.enums.DeactivationSource;
+import com.wintermindset.transaction_service.user.enums.UserRole;
 import com.wintermindset.transaction_service.user.factory.UserEntityTestFactory;
 
 import static org.assertj.core.api.Assertions.*;
@@ -16,12 +17,12 @@ class UserEntityTest {
 
     @Test
     void shouldCreateActiveUserWithCorrectDefaults() {
-        UserEntity user = UserEntityTestFactory.createActiveUser();
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser();
 
         assertThat(user.isActive()).isTrue();
         assertThat(user.getUsername()).isEqualTo("testuser");
         assertThat(user.getPasswordHash()).isEqualTo("hashed-password");
-        assertThat(user.getRole()).isEqualTo(Role.USER);
+        assertThat(user.getUserRole()).isEqualTo(UserRole.USER);
         assertThat(user.getCreatedAt()).isNotNull();
         assertThat(user.getDeactivatedAt()).isNull();
         assertThat(user.getDeactivationReason()).isNull();
@@ -32,26 +33,26 @@ class UserEntityTest {
 
     @Test
     void shouldDeactivateUserWithAuditData() {
-        UserEntity user = UserEntityTestFactory.createActiveUser();
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser();
         Instant now = Instant.now();
 
-        user.deactivate(now, DeactivationReason.ADMIN_ACTION, Role.ADMIN);
+        user.deactivate(now, DeactivationReason.ADMIN_ACTION, DeactivationSource.ADMIN);
 
         assertThat(user.isActive()).isFalse();
         assertThat(user.getDeactivatedAt()).isEqualTo(now);
         assertThat(user.getDeactivationReason()).isEqualTo(DeactivationReason.ADMIN_ACTION);
-        assertThat(user.getDeactivatedBy()).isEqualTo(Role.ADMIN);
+        assertThat(user.getDeactivatedBy()).isEqualTo(DeactivationSource.ADMIN);
     }
 
     @Test
     void shouldThrowWhenDeactivatingAlreadyInactiveUser() {
-        UserEntity user = UserEntityTestFactory.createDeactivatedUser();
+        UserProfileEntity user = UserEntityTestFactory.createDeactivatedUser();
 
         assertThatThrownBy(() ->
                 user.deactivate(
                         Instant.now(),
                         DeactivationReason.ADMIN_ACTION,
-                        Role.ADMIN
+                        DeactivationSource.ADMIN
                 )
         ).isInstanceOf(IllegalStateException.class)
          .hasMessage("User already deactivated");
@@ -59,14 +60,14 @@ class UserEntityTest {
 
     @Test
     void shouldThrowWhenDeactivationAuditDataIsMissing() {
-        UserEntity user = UserEntityTestFactory.createActiveUser();
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser();
 
         assertThatThrownBy(() ->
-                user.deactivate(null, DeactivationReason.ADMIN_ACTION, Role.ADMIN)
+                user.deactivate(null, DeactivationReason.ADMIN_ACTION, DeactivationSource.ADMIN)
         ).isInstanceOf(IllegalArgumentException.class);
 
         assertThatThrownBy(() ->
-                user.deactivate(Instant.now(), null, Role.ADMIN)
+                user.deactivate(Instant.now(), null, DeactivationSource.ADMIN)
         ).isInstanceOf(IllegalArgumentException.class);
 
         assertThatThrownBy(() ->
@@ -78,9 +79,9 @@ class UserEntityTest {
 
     @Test
     void shouldReactivatePreviouslyDeactivatedUser() {
-        UserEntity user = UserEntityTestFactory.createDeactivatedUser();
+        UserProfileEntity user = UserEntityTestFactory.createDeactivatedUser();
 
-        user.activate();
+        user.activate(Instant.now());
 
         assertThat(user.isActive()).isTrue();
         assertThat(user.getDeactivatedAt()).isNull();
@@ -90,28 +91,10 @@ class UserEntityTest {
 
     @Test
     void activateShouldBeIdempotentForActiveUser() {
-        UserEntity user = UserEntityTestFactory.createActiveUser();
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser();
 
-        user.activate();
+        user.activate(Instant.now());
 
         assertThat(user.isActive()).isTrue();
-    }
-
-    /* ---------- validateState (JPA safeguards) ---------- */
-
-    @Test
-    void validateState_shouldPassForValidActiveUser() {
-        UserEntity user = UserEntityTestFactory.createActiveUser();
-
-        assertThatCode(user::validateState)
-                .doesNotThrowAnyException();
-    }
-
-    @Test
-    void validateState_shouldPassForValiedDeactivatedUser() {
-        UserEntity user = UserEntityTestFactory.createDeactivatedUser();
-
-        assertThatCode(user::validateState)
-                .doesNotThrowAnyException();
     }
 }

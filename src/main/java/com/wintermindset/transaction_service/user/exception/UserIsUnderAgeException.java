@@ -1,24 +1,24 @@
 package com.wintermindset.transaction_service.user.exception;
 
-public class BadPasswordException extends RuntimeException {
+public class UserIsUnderAgeException extends RuntimeException {
     
-    public BadPasswordException() {
+    public UserIsUnderAgeException() {
         super();
     }
 
-    public BadPasswordException(String message) {
+    public UserIsUnderAgeException(String message) {
         super(message);
     }
 
-    public BadPasswordException(Throwable cause) {
+    public UserIsUnderAgeException(Throwable cause) {
         super(cause);
     }
 
-    public BadPasswordException(String message, Throwable cause) {
+    public UserIsUnderAgeException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public BadPasswordException(
+    public UserIsUnderAgeException(
         String message,
         Throwable cause,
         boolean enableSuppression,
