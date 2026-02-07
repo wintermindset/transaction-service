@@ -1,7 +1,7 @@
 package com.wintermindset.transaction_service.user.enums;
 
 public enum UserRole {
-    
+
     ADMIN(true),    
     USER(false);
 
