@@ -1,134 +1,120 @@
 package com.wintermindset.transaction_service.user.service;
 
 import java.time.Instant;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.wintermindset.transaction_service.user.entity.UserEntity;
-import com.wintermindset.transaction_service.user.enums.UserRole;
 import com.wintermindset.transaction_service.user.exception.BadPasswordException;
 import com.wintermindset.transaction_service.user.exception.UserAlreadyExistsException;
 import com.wintermindset.transaction_service.user.exception.UserNotFoundException;
-import com.wintermindset.transaction_service.user.repository.UserRepository;
+import com.wintermindset.transaction_service.user.command.CreateUserContactCommand;
+import com.wintermindset.transaction_service.user.command.CreateUserProfileCommand;
+import com.wintermindset.transaction_service.user.entity.UserContactEntity;
+import com.wintermindset.transaction_service.user.entity.UserProfileEntity;
+import com.wintermindset.transaction_service.user.repository.UserContactRepository;
+import com.wintermindset.transaction_service.user.repository.UserProfileRepository;
+import com.wintermindset.transaction_service.user.validator.UserContactValidator;
+import com.wintermindset.transaction_service.user.validator.UserProfileValidator;
 
 @Service
 public class UserService {
-
-    private static final Pattern USERNAME_FIRST_CHAR_IS_LETTER = Pattern.compile("^[a-zA-Z].*");
-    private static final Pattern USERNAME_LAST_CHAR_IS_LETTER_OR_DIGIT = Pattern.compile(".*[a-zA-Z0-9]$");
-    private static final Pattern USERNAME_ALLOWED_CHARS = Pattern.compile("^[a-zA-Z0-9_]+$");
     
-    private static final Pattern PASSWORD_HAS_CHAR_IN_LOWERCASE = Pattern.compile(".*[a-z].*");
-    private static final Pattern PASSWORD_HAS_CHAR_IN_UPPERCASE = Pattern.compile(".*[A-Z].*");
-    private static final Pattern PASSWORD_HAS_DIGIT = Pattern.compile(".*\\d.*");
-    private static final Pattern PASSWORD_HAS_SPECIAL = Pattern.compile(
-            ".*[!@#$%^&*()_+\\[\\]{}|;:'\",.<>?/].*"
-    );
-
-    private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final UserContactRepository userContactRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserProfileValidator userProfileValidator;
+    private final UserContactValidator userContactValidator;
 
     public UserService(
-                UserRepository userRepository,
-                PasswordEncoder passwordEncoder
+        UserProfileRepository userProfileRepository,
+        UserContactRepository userContactRepository,
+        PasswordEncoder passwordEncoder,
+        UserProfileValidator userProfileValidator,
+        UserContactValidator userContactValidator
     ) {
-        this.userRepository = userRepository;
+        this.userProfileRepository = userProfileRepository;
+        this.userContactRepository = userContactRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userProfileValidator = userProfileValidator;
+        this.userContactValidator = userContactValidator;
     }
 
-    public UserEntity createUser(String username, String rawPassword, UserRole role, Instant creationTime) {
-        String trimmedUsername = username.trim();
-        validateUsername(trimmedUsername);
-        if (userRepository.existsByUsername(trimmedUsername)) {
-            throw new UserAlreadyExistsException(username);
-        }
-        validatePassword(rawPassword);
-        validateRole(role);
-        validateCreationTime(creationTime);
-        String passwordHash = passwordEncoder.encode(rawPassword);
-        return userRepository.save(new UserEntity(trimmedUsername, passwordHash, role, creationTime));
+    public Optional<UserProfileEntity> getByUsername(String username) {
+        userProfileValidator.validateUsername(username);
+        return userProfileRepository.findByUsername(username);
     }
 
-    private void validateUsername(String username) {
-        Objects.requireNonNull(username, "Username must not be null");
-        StringBuilder errors = new StringBuilder();
-        if (username.length() < 3 || username.length() > 20) {
-            errors.append("\n- Username must be 3-20 characters long.");
-        }
-        if (!USERNAME_FIRST_CHAR_IS_LETTER.matcher(username).matches()) {
-            errors.append("\n- Username must start with letter.");
-        }
-        if (!USERNAME_LAST_CHAR_IS_LETTER_OR_DIGIT.matcher(username).matches()) {
-            errors.append("\n- Username must end with letter or digit.");
-        }
-        if (!USERNAME_ALLOWED_CHARS.matcher(username).matches()) {
-            errors.append(
-                "\n- Username must contain only letters, digits and underscores."
+    public UserProfileEntity createUserProfile(
+        CreateUserProfileCommand createUserCommand
+    ) {
+        validateCreateUserProfileCommand(createUserCommand);
+        String passwordHash = passwordEncoder.encode(
+            createUserCommand.rawPassword()
+        );
+        return userProfileRepository.save(
+            new UserProfileEntity(
+                createUserCommand.username(),
+                passwordHash,
+                createUserCommand.fullName(),
+                createUserCommand.birthday(),
+                createUserCommand.role(),
+                Instant.now()
+            )
+        );
+    }
+
+    private void validateCreateUserProfileCommand(CreateUserProfileCommand command) {
+        userProfileValidator.validate(command);
+        String username = command.username();
+        if (userProfileRepository.existsByUsername(username)) {
+            throw new UserAlreadyExistsException(
+                "User with username " + username + " already exists"
             );
         }
-        if (!errors.isEmpty()) {
-            throw new UserNotFoundException("Bad username." + errors.toString());
-        }
     }
 
-    private void validatePassword(String password) {
-        Objects.requireNonNull(password, "Password must not be null");
-        StringBuilder errors = new StringBuilder();
-        if (password.length() < 8 || password.length() > 32) {
-            errors.append("\n- Password must be 8-32 characters long.");
-        }
-        if (!PASSWORD_HAS_CHAR_IN_LOWERCASE.matcher(password).matches()) {
-            errors.append("\n- Password must contain at least one lowercase letter.");
-        }
-        if (!PASSWORD_HAS_CHAR_IN_UPPERCASE.matcher(password).matches()) {
-            errors.append("\n- Password must contain at least one uppercase letter.");
-        }
-        if (!PASSWORD_HAS_DIGIT.matcher(password).matches()) {
-            errors.append("\n- Password must contain at least one digit.");
-        }
-        if (!PASSWORD_HAS_SPECIAL.matcher(password).matches()) {
-            errors.append(
-                "\n- Password must contain at least one special character (!@#$%^&*()_+[]{}|;:'\",.<>?/)."
-            );
-        }
-        if (!errors.isEmpty()) {
-            throw new BadPasswordException("Bad password." + errors.toString());
-        }
+    public UserContactEntity createUserContact(CreateUserContactCommand command) {
+        userContactValidator.validate(command);
+        UserProfileEntity user = userProfileRepository.findById(command.userId())
+            .orElseThrow(() -> new UserNotFoundException(
+                "User not found with id: " + command.userId()
+            )
+        );
+        UserContactEntity contact = new UserContactEntity(
+            user,
+            command.contactType(),
+            command.value(),
+            Instant.now()
+        );
+        return userContactRepository.save(contact);
     }
 
-    private void validateRole(UserRole role) {
-        Objects.requireNonNull(role, "Role must not be null");
-    }
-
-    private void validateCreationTime(Instant creationTime) {
-        Objects.requireNonNull(creationTime, "Creation time must not be null");
-    }
-
-    public Optional<UserEntity> findById(UUID id) {
-        return userRepository.findById(id);
+    public boolean checkPassword(UUID userId, String rawPassword) {
+        UserProfileEntity user = userProfileRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+        return passwordEncoder.matches(rawPassword, user.getPasswordHash());
     }
 
     public void updatePassword(UUID userId, String oldPassword, String newPassword) {
-        Objects.requireNonNull(userId, "User ID must not be null");
-        Objects.requireNonNull(oldPassword, "Old password must not be null");
-        Objects.requireNonNull(newPassword, "New password must not be null");
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+        userProfileValidator.validatePassword(newPassword);
+        UserProfileEntity user = userProfileRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             throw new BadPasswordException("Old password is incorrect");
         }
-        validatePassword(newPassword);
         String newPasswordHash = passwordEncoder.encode(newPassword);
-        user.setPasswordHash(newPasswordHash);
-        userRepository.save(user);
+        user.changePasswordHash(newPasswordHash, Instant.now());
+        userProfileRepository.save(user);
     }
 
-    public Optional<UserEntity> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public UserProfileEntity getReferenceByUsername(String username) {
+        return userProfileRepository.findByUsername(username)
+            .orElseThrow(() -> new UserNotFoundException(
+                "User with username " + username + " doesn't exist"
+            )
+        );
     }
 }
