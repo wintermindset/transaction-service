@@ -1,10 +1,5 @@
 package com.wintermindset.transaction_service.user.repository;
 
-import com.wintermindset.transaction_service.user.entity.UserEntity;
-import com.wintermindset.transaction_service.user.enums.DeactivationReason;
-import com.wintermindset.transaction_service.user.enums.UserRole;
-import com.wintermindset.transaction_service.user.factory.UserEntityTestFactory;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +15,18 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.wintermindset.transaction_service.user.enums.DeactivationReason;
+import com.wintermindset.transaction_service.user.enums.DeactivationSource;
+import com.wintermindset.transaction_service.user.enums.UserRole;
+import com.wintermindset.transaction_service.user.entity.UserProfileEntity;
+import com.wintermindset.transaction_service.user.factory.UserEntityTestFactory;
+
 @DataJpaTest
 @ActiveProfiles("test")
 class UserRepositoryIntegrationTest {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserProfileRepository userRepository;
 
     @BeforeEach
     void cleanDatabase() {
@@ -39,25 +40,25 @@ class UserRepositoryIntegrationTest {
     @Test
     void saveAndFindById() {
         String username = uniqueUsername("testuser");
-        UserEntity user = UserEntityTestFactory.createActiveUser(username);
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser(username);
 
-        UserEntity savedUser = userRepository.save(user);
-        Optional<UserEntity> foundUser = userRepository.findById(savedUser.getId());
+        UserProfileEntity savedUser = userRepository.save(user);
+        Optional<UserProfileEntity> foundUser = userRepository.findById(savedUser.getUserId());
 
         assertThat(foundUser)
                 .isPresent()
                 .get()
-                .extracting(UserEntity::getUsername, UserEntity::isActive)
+                .extracting(UserProfileEntity::getUsername, UserProfileEntity::isActive)
                 .containsExactly(username, true);
     }
 
     @Test
     void saveAndFindById_whenUserIsDeactivated() {
         String username = uniqueUsername("deactivated");
-        UserEntity user = UserEntityTestFactory.createDeactivatedUser(username);
-        UserEntity savedUser = userRepository.save(user);
+        UserProfileEntity user = UserEntityTestFactory.createDeactivatedUser(username);
+        UserProfileEntity savedUser = userRepository.save(user);
 
-        Optional<UserEntity> foundUser = userRepository.findById(savedUser.getId());
+        Optional<UserProfileEntity> foundUser = userRepository.findById(savedUser.getUserId());
         assertThat(foundUser)
                 .isPresent()
                 .get()
@@ -70,14 +71,14 @@ class UserRepositoryIntegrationTest {
     @Test
     void findById_whenUserDoesNotExist() {
         UUID nonExistentId = UUID.randomUUID();
-        Optional<UserEntity> foundUser = userRepository.findById(nonExistentId);
+        Optional<UserProfileEntity> foundUser = userRepository.findById(nonExistentId);
         assertThat(foundUser).isEmpty();
     }
 
     @Test
     void findByUsername_caseSensitive() {
         String username = uniqueUsername("TestUser");
-        UserEntity user = UserEntityTestFactory.createActiveUser(username);
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser(username);
         userRepository.save(user);
 
         assertThat(userRepository.findByUsername(username)).isPresent();
@@ -87,7 +88,7 @@ class UserRepositoryIntegrationTest {
     @Test
     void existsByUsername_checksCorrectly() {
         String username = uniqueUsername("jane.doe");
-        UserEntity user = UserEntityTestFactory.createActiveUser(username);
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser(username);
         userRepository.save(user);
 
         assertThat(userRepository.existsByUsername(username)).isTrue();
@@ -97,10 +98,10 @@ class UserRepositoryIntegrationTest {
     @Test
     void uniqueConstraintOnUsername_preventsDuplicateUsernames() {
         String username = uniqueUsername("unique.user");
-        UserEntity user1 = UserEntityTestFactory.createActiveUser(username);
+        UserProfileEntity user1 = UserEntityTestFactory.createActiveUser(username);
         userRepository.saveAndFlush(user1);
 
-        UserEntity user2 = UserEntityTestFactory.createActiveUser(username);
+        UserProfileEntity user2 = UserEntityTestFactory.createActiveUser(username);
         assertThatThrownBy(() -> userRepository.saveAndFlush(user2))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
@@ -108,61 +109,61 @@ class UserRepositoryIntegrationTest {
     @Test
     void updatePassword_works() {
         String username = uniqueUsername("user.with.password");
-        UserEntity user = UserEntityTestFactory.createActiveUser(username);
-        UserEntity savedUser = userRepository.save(user);
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser(username);
+        UserProfileEntity savedUser = userRepository.save(user);
 
-        savedUser.setPasswordHash("new-hashed-password");
+        savedUser.changePasswordHash("new-hashed-password", Instant.now());
         userRepository.save(savedUser);
 
-        assertThat(userRepository.findById(savedUser.getId()))
+        assertThat(userRepository.findById(savedUser.getUserId()))
                 .isPresent()
                 .get()
-                .extracting(UserEntity::getPasswordHash)
+                .extracting(UserProfileEntity::getPasswordHash)
                 .isEqualTo("new-hashed-password");
     }
 
     @Test
     void deleteUser_works() {
         String username = uniqueUsername("to.delete");
-        UserEntity user = UserEntityTestFactory.createActiveUser(username);
-        UserEntity savedUser = userRepository.save(user);
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser(username);
+        UserProfileEntity savedUser = userRepository.save(user);
 
         userRepository.delete(savedUser);
 
-        assertThat(userRepository.findById(savedUser.getId())).isEmpty();
+        assertThat(userRepository.findById(savedUser.getUserId())).isEmpty();
     }
 
     @Test
     void findAll_andSaveAll_works() {
-        List<UserEntity> users = List.of(
+        List<UserProfileEntity> users = List.of(
                 UserEntityTestFactory.createActiveUser(uniqueUsername("user1")),
                 UserEntityTestFactory.createActiveUser(uniqueUsername("user2")),
                 UserEntityTestFactory.createActiveUser(uniqueUsername("user3"))
         );
         userRepository.saveAll(users);
 
-        List<UserEntity> allUsers = userRepository.findAll();
+        List<UserProfileEntity> allUsers = userRepository.findAll();
         assertThat(allUsers).hasSize(3);
     }
 
     @Test
     void deactivateAndActivateUser_works() {
         String username = uniqueUsername("state.change");
-        UserEntity user = UserEntityTestFactory.createActiveUser(username);
-        UserEntity savedUser = userRepository.save(user);
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser(username);
+        UserProfileEntity savedUser = userRepository.save(user);
 
-        savedUser.deactivate(Instant.now(), DeactivationReason.USER_REQUEST, UserRole.ADMIN);
+        savedUser.deactivate(Instant.now(), DeactivationReason.USER_REQUEST, DeactivationSource.ADMIN);
         userRepository.save(savedUser);
 
-        Optional<UserEntity> deactivatedUser = userRepository.findById(savedUser.getId());
+        Optional<UserProfileEntity> deactivatedUser = userRepository.findById(savedUser.getUserId());
         assertThat(deactivatedUser).isPresent();
         assertThat(deactivatedUser.get().isActive()).isFalse();
         assertThat(deactivatedUser.get().getDeactivationReason()).isEqualTo(DeactivationReason.USER_REQUEST);
 
-        deactivatedUser.get().activate();
+        deactivatedUser.get().activate(Instant.now());
         userRepository.save(deactivatedUser.get());
 
-        Optional<UserEntity> activatedUser = userRepository.findById(savedUser.getId());
+        Optional<UserProfileEntity> activatedUser = userRepository.findById(savedUser.getUserId());
         assertThat(activatedUser).isPresent();
         assertThat(activatedUser.get().isActive()).isTrue();
         assertThat(activatedUser.get().getDeactivationReason()).isNull();
@@ -171,10 +172,10 @@ class UserRepositoryIntegrationTest {
     @Test
     void userWithDifferentRoles_works() {
         String username = uniqueUsername("admin.user");
-        UserEntity user = UserEntityTestFactory.createActiveUser(username, UserRole.ADMIN);
-        UserEntity savedUser = userRepository.save(user);
+        UserProfileEntity user = UserEntityTestFactory.createActiveUser(username, UserRole.ADMIN);
+        UserProfileEntity savedUser = userRepository.save(user);
 
-        Optional<UserEntity> foundUser = userRepository.findById(savedUser.getId());
+        Optional<UserProfileEntity> foundUser = userRepository.findById(savedUser.getUserId());
         assertThat(foundUser).isPresent();
         assertThat(foundUser.get().getUserRole()).isEqualTo(UserRole.ADMIN);
     }
